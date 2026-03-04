@@ -14,7 +14,37 @@ datasource db {
 }
 
 model User {
-  id    String  @id @default(uuid())
-  name  String
-  email String  @unique
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  reservations Reservation[]
+}
+
+model Salle {
+  id            String        @id @default(uuid())
+  label         String
+  description   String?
+  capacity      Int
+  locationPrice Int
+  reservations  Reservation[]
+}
+
+model Reservation {
+  id              String        @id @default(uuid())
+  userId          String
+  salleId         String
+  startDate       DateTime?
+  endDate         DateTime?
+  startHour       String?
+  endHour         String?
+  isPaid          PaymentStatus
+  remainingAmount Int
+  user            User          @relation(fields: [userId], references: [id])
+  salle           Salle         @relation(fields: [salleId], references: [id])
+}
+
+enum PaymentStatus {
+  PAID
+  UNPAID
+  DEPOSIT
 }
