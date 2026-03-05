@@ -9,17 +9,3 @@ export const getUsers = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Internal Server Error' })
   }
 }
-
-export const createUser = async (req: Request, res: Response) => {
-  try {
-    const { email, name } = req.body
-    const user = await userService.createUser(email, name)
-    res.status(201).json(user)
-  } catch (err) {
-    res.status(500).json({ error: 'Internal Server Error' })
-  }
-}
-
-export const testEndpoint = (req: Request, res: Response) => {
-  res.json({ message: 'Hello World!' })
-}
