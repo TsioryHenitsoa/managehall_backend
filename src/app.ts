@@ -1,14 +1,16 @@
 import express from 'express'
-import userRoutes from './routes/user.routes'
-import salleRoutes from './routes/salle.routes'
-import authRoutes from './routes/auth.routes'
+import swaggerUi from 'swagger-ui-express'
+import swaggerDocument from './swagger/swagger.json'
+import { RegisterRoutes } from './routes_generated/routes'
 
 const app = express()
 app.use(express.json())
 
+//swagger
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+
+RegisterRoutes(app)
+
 app.get('/', (req, res) => res.json({ message: 'Hello World!' }))
-app.use('/auth', authRoutes)
-app.use('/users', userRoutes)
-app.use('/salles', salleRoutes)
 
 export default app

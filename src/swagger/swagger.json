@@ -1,0 +1,570 @@
+{
+	"openapi": "3.0.0",
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"User": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"email",
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": true
+			},
+			"Salle": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"label": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string",
+						"nullable": true
+					},
+					"capacity": {
+						"type": "number",
+						"format": "double"
+					},
+					"locationPrice": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"id",
+					"label",
+					"description",
+					"capacity",
+					"locationPrice"
+				],
+				"type": "object",
+				"additionalProperties": true
+			},
+			"PaymentStatus": {
+				"type": "string",
+				"enum": [
+					"PAID",
+					"UNPAID",
+					"DEPOSIT"
+				]
+			},
+			"Reservation": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"userId": {
+						"type": "string"
+					},
+					"salleId": {
+						"type": "string"
+					},
+					"startDate": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true
+					},
+					"endDate": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true
+					},
+					"startHour": {
+						"type": "string",
+						"nullable": true
+					},
+					"endHour": {
+						"type": "string",
+						"nullable": true
+					},
+					"isPaid": {
+						"$ref": "#/components/schemas/PaymentStatus"
+					},
+					"remainingAmount": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"id",
+					"userId",
+					"salleId",
+					"startDate",
+					"endDate",
+					"startHour",
+					"endHour",
+					"isPaid",
+					"remainingAmount"
+				],
+				"type": "object",
+				"additionalProperties": true
+			},
+			"AuthUser": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"email",
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": true
+			},
+			"AuthPayload": {
+				"properties": {
+					"user": {
+						"$ref": "#/components/schemas/AuthUser"
+					},
+					"token": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"user",
+					"token"
+				],
+				"type": "object",
+				"additionalProperties": true
+			}
+		},
+		"securitySchemes": {}
+	},
+	"info": {
+		"title": "hall_backend",
+		"version": "1.0.0",
+		"license": {
+			"name": "ISC"
+		},
+		"contact": {}
+	},
+	"paths": {
+		"/users": {
+			"get": {
+				"operationId": "GetUsers",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/User"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"User"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/salles": {
+			"get": {
+				"operationId": "GetSalles",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/Salle"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Salle"
+				],
+				"security": [],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "CreateSalle",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Salle"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Salle"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"locationPrice": {
+										"type": "number",
+										"format": "double"
+									},
+									"capacity": {
+										"type": "number",
+										"format": "double"
+									},
+									"description": {
+										"type": "string"
+									},
+									"label": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"locationPrice",
+									"capacity",
+									"description",
+									"label"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/salles/{id}": {
+			"get": {
+				"operationId": "GetSalleById",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Salle"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Salle not found"
+					}
+				},
+				"tags": [
+					"Salle"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateSalle",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Salle"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Salle not found"
+					}
+				},
+				"tags": [
+					"Salle"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"locationPrice": {
+										"type": "number",
+										"format": "double"
+									},
+									"capacity": {
+										"type": "number",
+										"format": "double"
+									},
+									"description": {
+										"type": "string"
+									},
+									"label": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"locationPrice",
+									"capacity",
+									"description",
+									"label"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteSalle",
+				"responses": {
+					"204": {
+						"description": "No content"
+					},
+					"404": {
+						"description": "Salle not found"
+					}
+				},
+				"tags": [
+					"Salle"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/reservations": {
+			"post": {
+				"operationId": "CreateReservation",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Reservation"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Reservation"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"remainingAmount": {
+										"type": "number",
+										"format": "double"
+									},
+									"isPaid": {
+										"$ref": "#/components/schemas/PaymentStatus"
+									},
+									"endHour": {
+										"type": "string"
+									},
+									"startHour": {
+										"type": "string"
+									},
+									"endDate": {
+										"type": "string"
+									},
+									"startDate": {
+										"type": "string"
+									},
+									"salleId": {
+										"type": "string"
+									},
+									"userId": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"endHour",
+									"startHour",
+									"endDate",
+									"startDate",
+									"salleId",
+									"userId"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/auth/signup": {
+			"post": {
+				"operationId": "Signup",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AuthPayload"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "email, name and password are required"
+					},
+					"409": {
+						"description": "Email already exists"
+					}
+				},
+				"tags": [
+					"Auth"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"password": {
+										"type": "string"
+									},
+									"name": {
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"password",
+									"name",
+									"email"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/auth/login": {
+			"post": {
+				"operationId": "Login",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AuthPayload"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "email and password are required"
+					},
+					"401": {
+						"description": "Invalid credentials"
+					}
+				},
+				"tags": [
+					"Auth"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"password": {
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"password",
+									"email"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	]
+}

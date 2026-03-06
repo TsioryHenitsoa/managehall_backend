@@ -15,6 +15,12 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 var __importStar = (this && this.__importStar) || (function () {
     var ownKeys = function(o) {
         ownKeys = Object.getOwnPropertyNames || function (o) {
@@ -32,40 +38,78 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.login = exports.signup = void 0;
+exports.AuthController = void 0;
+const tsoa_1 = require("tsoa");
 const authService = __importStar(require("../services/auth.service"));
-const signup = async (req, res) => {
-    try {
-        const { email, name, password } = req.body;
+let AuthController = class AuthController extends tsoa_1.Controller {
+    async signup(body) {
+        const { email, name, password } = body;
         if (!email || !name || !password) {
-            return res.status(400).json({ error: 'email, name and password are required' });
+            this.setStatus(400);
+            throw new Error('email, name and password are required');
         }
-        const result = await authService.signup(email, name, password);
-        return res.status(201).json(result);
-    }
-    catch (err) {
-        if (err instanceof Error && err.message === 'EMAIL_ALREADY_EXISTS') {
-            return res.status(409).json({ error: 'Email already exists' });
+        try {
+            const result = await authService.signup(email, name, password);
+            this.setStatus(201);
+            return result;
         }
-        return res.status(500).json({ error: 'Internal Server Error' });
+        catch (err) {
+            if (err instanceof Error && err.message === 'EMAIL_ALREADY_EXISTS') {
+                this.setStatus(409);
+                throw new Error('Email already exists');
+            }
+            this.setStatus(500);
+            throw new Error('Internal Server Error');
+        }
     }
-};
-exports.signup = signup;
-const login = async (req, res) => {
-    try {
-        const { email, password } = req.body;
+    async login(body) {
+        const { email, password } = body;
         if (!email || !password) {
-            return res.status(400).json({ error: 'email and password are required' });
+            this.setStatus(400);
+            throw new Error('email and password are required');
         }
-        const result = await authService.login(email, password);
-        return res.status(200).json(result);
-    }
-    catch (err) {
-        if (err instanceof Error && err.message === 'INVALID_CREDENTIALS') {
-            return res.status(401).json({ error: 'Invalid credentials' });
+        try {
+            const result = await authService.login(email, password);
+            this.setStatus(200);
+            return result;
         }
-        return res.status(500).json({ error: 'Internal Server Error' });
+        catch (err) {
+            if (err instanceof Error && err.message === 'INVALID_CREDENTIALS') {
+                this.setStatus(401);
+                throw new Error('Invalid credentials');
+            }
+            this.setStatus(500);
+            throw new Error('Internal Server Error');
+        }
     }
 };
-exports.login = login;
+exports.AuthController = AuthController;
+__decorate([
+    (0, tsoa_1.Post)('signup'),
+    (0, tsoa_1.Response)(400, 'email, name and password are required'),
+    (0, tsoa_1.Response)(409, 'Email already exists'),
+    __param(0, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "signup", null);
+__decorate([
+    (0, tsoa_1.Post)('login'),
+    (0, tsoa_1.Response)(400, 'email and password are required'),
+    (0, tsoa_1.Response)(401, 'Invalid credentials'),
+    __param(0, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "login", null);
+exports.AuthController = AuthController = __decorate([
+    (0, tsoa_1.Route)('auth'),
+    (0, tsoa_1.Tags)('Auth')
+], AuthController);

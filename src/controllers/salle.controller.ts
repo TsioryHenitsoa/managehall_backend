@@ -1,52 +1,56 @@
-import { Request, Response } from 'express'
+import { Controller, Get, Post, Put, Delete, Route, Tags, Body, Path, Response } from 'tsoa'
 import * as salleService from '../services/salle.service'
 
-export const getSalles = async (req: Request, res: Response) => {
-  try {
-    const salles = await salleService.getAllSalles()
-    res.json(salles)
-  } catch (err) {
-    res.status(500).json({ error: 'Internal Server Error' })
-  }
+// Définir un type Salle pour Swagger
+interface Salle {
+  id: string
+  label: string
+  description: string | null
+  capacity: number
+  locationPrice: number
 }
 
-export const createSalle = async (req: Request, res: Response) => {
-  try {
-    const { label, description, capacity, locationPrice } = req.body
-    const salle = await salleService.createSalle(label, description, capacity, locationPrice)
-    res.status(201).json(salle)
-  } catch (err) {
-    res.status(500).json({ error: 'Internal Server Error' })
-  }
-}
+@Route('salles')
+@Tags('Salle')
+export class SalleController extends Controller {
 
-export const getSalleById = async (req: Request<{ id: string }>, res: Response) => {
-  try {
-    const { id } = req.params
+  @Get('/')
+  public async getSalles(): Promise<Salle[]> {
+    return await salleService.getAllSalles()
+  }
+
+  @Post('/')
+  public async createSalle(
+    @Body() body: { label: string; description: string; capacity: number; locationPrice: number }
+  ): Promise<Salle> {
+    const { label, description, capacity, locationPrice } = body
+    return await salleService.createSalle(label, description, capacity, locationPrice)
+  }
+
+  @Get('{id}')
+  @Response(404, 'Salle not found')
+  public async getSalleById(@Path() id: string): Promise<Salle> {
     const salle = await salleService.getSalleById(id)
-    res.json(salle)
-  } catch (err) {
-    res.status(404).json({ error: 'Salle not found' })
+    if (!salle) throw new Error('Salle not found')
+    return salle
   }
-}
 
-export const deleteSalle = async (req: Request<{ id: string }>, res: Response) => {
-  try {
-    const { id } = req.params
-    await salleService.deleteSalle(id)
-    res.status(204).send()
-  } catch (err) {
-    res.status(404).json({ error: 'Salle not found' })
-  }
-}
-
-export const updateSalle = async (req: Request<{ id: string }>, res: Response) => {
-  try {
-    const { id } = req.params
-    const { label, description, capacity, locationPrice } = req.body
+  @Put('{id}')
+  @Response(404, 'Salle not found')
+  public async updateSalle(
+    @Path() id: string,
+    @Body() body: { label: string; description: string; capacity: number; locationPrice: number }
+  ): Promise<Salle> {
+    const { label, description, capacity, locationPrice } = body
     const salle = await salleService.updateSalle(id, label, description, capacity, locationPrice)
-    res.json(salle)
-  } catch (err) {
-    res.status(404).json({ error: 'Salle not found' })
+    if (!salle) throw new Error('Salle not found')
+    return salle
+  }
+
+  @Delete('{id}')
+  @Response(404, 'Salle not found')
+  @Response(204, 'No Content')
+  public async deleteSalle(@Path() id: string): Promise<void> {
+    await salleService.deleteSalle(id)
   }
 }

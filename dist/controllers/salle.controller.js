@@ -15,6 +15,12 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 var __importStar = (this && this.__importStar) || (function () {
     var ownKeys = function(o) {
         ownKeys = Object.getOwnPropertyNames || function (o) {
@@ -32,38 +38,82 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSalleById = exports.createSalle = exports.getSalles = void 0;
+exports.SalleController = void 0;
+const tsoa_1 = require("tsoa");
 const salleService = __importStar(require("../services/salle.service"));
-const getSalles = async (req, res) => {
-    try {
-        const salles = await salleService.getAllSalles();
-        res.json(salles);
+let SalleController = class SalleController extends tsoa_1.Controller {
+    async getSalles() {
+        return await salleService.getAllSalles();
     }
-    catch (err) {
-        res.status(500).json({ error: 'Internal Server Error' });
+    async createSalle(body) {
+        const { label, description, capacity, locationPrice } = body;
+        return await salleService.createSalle(label, description, capacity, locationPrice);
     }
-};
-exports.getSalles = getSalles;
-const createSalle = async (req, res) => {
-    try {
-        const { label, description, capacity, locationPrice } = req.body;
-        const salle = await salleService.createSalle(label, description, capacity, locationPrice);
-        res.status(201).json(salle);
-    }
-    catch (err) {
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-};
-exports.createSalle = createSalle;
-const getSalleById = async (req, res) => {
-    try {
-        const { id } = req.params;
+    async getSalleById(id) {
         const salle = await salleService.getSalleById(id);
-        res.json(salle);
+        if (!salle)
+            throw new Error('Salle not found');
+        return salle;
     }
-    catch (err) {
-        res.status(404).json({ error: 'Salle not found' });
+    async updateSalle(id, body) {
+        const { label, description, capacity, locationPrice } = body;
+        const salle = await salleService.updateSalle(id, label, description, capacity, locationPrice);
+        if (!salle)
+            throw new Error('Salle not found');
+        return salle;
+    }
+    async deleteSalle(id) {
+        await salleService.deleteSalle(id);
     }
 };
-exports.getSalleById = getSalleById;
+exports.SalleController = SalleController;
+__decorate([
+    (0, tsoa_1.Get)('/'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], SalleController.prototype, "getSalles", null);
+__decorate([
+    (0, tsoa_1.Post)('/'),
+    __param(0, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], SalleController.prototype, "createSalle", null);
+__decorate([
+    (0, tsoa_1.Get)('{id}'),
+    (0, tsoa_1.Response)(404, 'Salle not found'),
+    __param(0, (0, tsoa_1.Path)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], SalleController.prototype, "getSalleById", null);
+__decorate([
+    (0, tsoa_1.Put)('{id}'),
+    (0, tsoa_1.Response)(404, 'Salle not found'),
+    __param(0, (0, tsoa_1.Path)()),
+    __param(1, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], SalleController.prototype, "updateSalle", null);
+__decorate([
+    (0, tsoa_1.Delete)('{id}'),
+    (0, tsoa_1.Response)(404, 'Salle not found'),
+    (0, tsoa_1.Response)(204, 'No Content'),
+    __param(0, (0, tsoa_1.Path)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], SalleController.prototype, "deleteSalle", null);
+exports.SalleController = SalleController = __decorate([
+    (0, tsoa_1.Route)('salles'),
+    (0, tsoa_1.Tags)('Salle')
+], SalleController);
