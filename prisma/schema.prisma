@@ -1,16 +1,10 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
 }
 
 model User {
@@ -18,34 +12,86 @@ model User {
   name         String
   email        String        @unique
   password     String
+  role         String        @default("USER")
   reservations Reservation[]
+  createdAt    DateTime      @default(now())
 }
 
 model Salle {
-  id            String        @id @default(uuid())
-  label         String
-  description   String?
-  capacity      Int
-  locationPrice Int
-  reservations  Reservation[]
+  id           String        @id @default(uuid())
+  label        String
+  description  String?
+  capacity     Int
+  pricePerHour Float
+  building     String        @default("ISS")
+  type         String        @default("SALLE")
+  isActive     Boolean       @default(true)
+  reservations Reservation[]
+  createdAt    DateTime      @default(now())
 }
 
 model Reservation {
-  id              String        @id @default(uuid())
-  userId          String
-  salleId         String
-  startDate       DateTime?
-  endDate         DateTime?
-  startHour       String?
-  endHour         String?
-  isPaid          PaymentStatus
-  remainingAmount Int
-  user            User          @relation(fields: [userId], references: [id])
-  salle           Salle         @relation(fields: [salleId], references: [id])
+  id          String    @id @default(uuid())
+  userId      String
+  salleId     String
+  startTime   DateTime
+  endTime     DateTime
+  pricePerHourSnapshot Float   @default(0)
+  totalAmount Float
+  paidAmount  Float     @default(0)
+  status      String    @default("CONFIRMED")
+  note        String?
+  user        User      @relation(fields: [userId], references: [id])
+  salle       Salle     @relation(fields: [salleId], references: [id])
+  payments    Payment[]
+  paymentEvents PaymentEvent[]
+  histories   ReservationHistory[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([startTime])
+  @@index([status])
+  @@index([salleId, startTime])
 }
 
-enum PaymentStatus {
-  PAID
-  UNPAID
-  DEPOSIT
+model Payment {
+  id            String      @id @default(uuid())
+  reservationId String
+  amount        Float
+  method        String      @default("CASH")
+  reservation   Reservation @relation(fields: [reservationId], references: [id])
+  events        PaymentEvent[]
+  createdAt     DateTime    @default(now())
+
+  @@index([createdAt])
+  @@index([method, createdAt])
+}
+
+model ReservationHistory {
+  id            String      @id @default(uuid())
+  reservationId String
+  action        String
+  actorUserId   String?
+  details       String?
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+
+  @@index([reservationId, createdAt])
+  @@index([action, createdAt])
+}
+
+model PaymentEvent {
+  id            String      @id @default(uuid())
+  reservationId String
+  paymentId     String?
+  eventType     String      @default("PAYMENT_CREATED")
+  amount        Float
+  method        String?
+  note          String?
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  payment       Payment?    @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  createdAt     DateTime    @default(now())
+
+  @@index([reservationId, createdAt])
+  @@index([eventType, createdAt])
 }

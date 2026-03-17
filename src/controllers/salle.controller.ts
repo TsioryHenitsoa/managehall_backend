@@ -1,13 +1,40 @@
-import { Controller, Get, Post, Put, Delete, Route, Tags, Body, Path, Response } from 'tsoa'
+import { Controller, Get, Post, Put, Delete, Route, Tags, Body, Path, Query, Security } from 'tsoa'
 import * as salleService from '../services/salle.service'
 
-// Définir un type Salle pour Swagger
-interface Salle {
+interface SalleResponse {
   id: string
   label: string
   description: string | null
   capacity: number
-  locationPrice: number
+  pricePerHour: number
+  building: string
+  type: string
+  isActive: boolean
+  createdAt: Date
+}
+
+interface CreateSalleBody {
+  label: string
+  description?: string
+  capacity: number
+  pricePerHour: number
+  building?: string
+  type?: string
+}
+
+interface UpdateSalleBody {
+  label?: string
+  description?: string
+  capacity?: number
+  pricePerHour?: number
+  building?: string
+  type?: string
+}
+
+interface AvailabilityResponse {
+  date: string
+  salleId: string
+  reservations: { start: string; end: string }[]
 }
 
 @Route('salles')
@@ -15,42 +42,54 @@ interface Salle {
 export class SalleController extends Controller {
 
   @Get('/')
-  public async getSalles(): Promise<Salle[]> {
-    return await salleService.getAllSalles()
+  public async getSalles(
+    @Query() type?: string,
+    @Query() building?: string
+  ): Promise<SalleResponse[]> {
+    return salleService.getAllSalles({ type, building })
   }
 
-  @Post('/')
-  public async createSalle(
-    @Body() body: { label: string; description: string; capacity: number; locationPrice: number }
-  ): Promise<Salle> {
-    const { label, description, capacity, locationPrice } = body
-    return await salleService.createSalle(label, description, capacity, locationPrice)
+  @Get('disponibles')
+  public async getAvailableSalles(
+    @Query() start: string,
+    @Query() end: string
+  ): Promise<SalleResponse[]> {
+    return salleService.getAvailableSalles(start, end)
   }
 
   @Get('{id}')
-  @Response(404, 'Salle not found')
-  public async getSalleById(@Path() id: string): Promise<Salle> {
-    const salle = await salleService.getSalleById(id)
-    if (!salle) throw new Error('Salle not found')
-    return salle
+  public async getSalleById(@Path() id: string): Promise<SalleResponse> {
+    return salleService.getSalleById(id)
+  }
+
+  @Get('{id}/disponibilites')
+  public async getAvailability(
+    @Path() id: string,
+    @Query() date: string
+  ): Promise<AvailabilityResponse> {
+    return salleService.getAvailableSlots(id, date)
+  }
+
+  @Post('/')
+  @Security('jwt', ['ADMIN'])
+  public async createSalle(@Body() body: CreateSalleBody): Promise<SalleResponse> {
+    this.setStatus(201)
+    return salleService.createSalle(body)
   }
 
   @Put('{id}')
-  @Response(404, 'Salle not found')
+  @Security('jwt', ['ADMIN'])
   public async updateSalle(
     @Path() id: string,
-    @Body() body: { label: string; description: string; capacity: number; locationPrice: number }
-  ): Promise<Salle> {
-    const { label, description, capacity, locationPrice } = body
-    const salle = await salleService.updateSalle(id, label, description, capacity, locationPrice)
-    if (!salle) throw new Error('Salle not found')
-    return salle
+    @Body() body: UpdateSalleBody
+  ): Promise<SalleResponse> {
+    return salleService.updateSalle(id, body)
   }
 
   @Delete('{id}')
-  @Response(404, 'Salle not found')
-  @Response(204, 'No Content')
+  @Security('jwt', ['ADMIN'])
   public async deleteSalle(@Path() id: string): Promise<void> {
     await salleService.deleteSalle(id)
+    this.setStatus(204)
   }
 }

@@ -48,7 +48,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.defineExtension = exports.NullsOrder = exports.QueryMode = exports.SortOrder = exports.ReservationScalarFieldEnum = exports.SalleScalarFieldEnum = exports.UserScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.prismaVersion = exports.getExtensionContext = exports.Decimal = exports.Sql = exports.raw = exports.join = exports.empty = exports.sql = exports.PrismaClientValidationError = exports.PrismaClientInitializationError = exports.PrismaClientRustPanicError = exports.PrismaClientUnknownRequestError = exports.PrismaClientKnownRequestError = void 0;
+exports.defineExtension = exports.NullsOrder = exports.SortOrder = exports.PaymentEventScalarFieldEnum = exports.ReservationHistoryScalarFieldEnum = exports.PaymentScalarFieldEnum = exports.ReservationScalarFieldEnum = exports.SalleScalarFieldEnum = exports.UserScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.prismaVersion = exports.getExtensionContext = exports.Decimal = exports.Sql = exports.raw = exports.join = exports.empty = exports.sql = exports.PrismaClientValidationError = exports.PrismaClientInitializationError = exports.PrismaClientRustPanicError = exports.PrismaClientUnknownRequestError = exports.PrismaClientKnownRequestError = void 0;
 const runtime = __importStar(require("@prisma/client/runtime/client"));
 /**
  * Prisma Errors
@@ -105,48 +105,78 @@ exports.AnyNull = runtime.AnyNull;
 exports.ModelName = {
     User: 'User',
     Salle: 'Salle',
-    Reservation: 'Reservation'
+    Reservation: 'Reservation',
+    Payment: 'Payment',
+    ReservationHistory: 'ReservationHistory',
+    PaymentEvent: 'PaymentEvent'
 };
 /**
  * Enums
  */
 exports.TransactionIsolationLevel = runtime.makeStrictEnum({
-    ReadUncommitted: 'ReadUncommitted',
-    ReadCommitted: 'ReadCommitted',
-    RepeatableRead: 'RepeatableRead',
     Serializable: 'Serializable'
 });
 exports.UserScalarFieldEnum = {
     id: 'id',
     name: 'name',
     email: 'email',
-    password: 'password'
+    password: 'password',
+    role: 'role',
+    createdAt: 'createdAt'
 };
 exports.SalleScalarFieldEnum = {
     id: 'id',
     label: 'label',
     description: 'description',
     capacity: 'capacity',
-    locationPrice: 'locationPrice'
+    pricePerHour: 'pricePerHour',
+    building: 'building',
+    type: 'type',
+    isActive: 'isActive',
+    createdAt: 'createdAt'
 };
 exports.ReservationScalarFieldEnum = {
     id: 'id',
     userId: 'userId',
     salleId: 'salleId',
-    startDate: 'startDate',
-    endDate: 'endDate',
-    startHour: 'startHour',
-    endHour: 'endHour',
-    isPaid: 'isPaid',
-    remainingAmount: 'remainingAmount'
+    startTime: 'startTime',
+    endTime: 'endTime',
+    pricePerHourSnapshot: 'pricePerHourSnapshot',
+    totalAmount: 'totalAmount',
+    paidAmount: 'paidAmount',
+    status: 'status',
+    note: 'note',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+exports.PaymentScalarFieldEnum = {
+    id: 'id',
+    reservationId: 'reservationId',
+    amount: 'amount',
+    method: 'method',
+    createdAt: 'createdAt'
+};
+exports.ReservationHistoryScalarFieldEnum = {
+    id: 'id',
+    reservationId: 'reservationId',
+    action: 'action',
+    actorUserId: 'actorUserId',
+    details: 'details',
+    createdAt: 'createdAt'
+};
+exports.PaymentEventScalarFieldEnum = {
+    id: 'id',
+    reservationId: 'reservationId',
+    paymentId: 'paymentId',
+    eventType: 'eventType',
+    amount: 'amount',
+    method: 'method',
+    note: 'note',
+    createdAt: 'createdAt'
 };
 exports.SortOrder = {
     asc: 'asc',
     desc: 'desc'
-};
-exports.QueryMode = {
-    default: 'default',
-    insensitive: 'insensitive'
 };
 exports.NullsOrder = {
     first: 'first',

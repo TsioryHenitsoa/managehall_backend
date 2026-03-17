@@ -49,55 +49,73 @@ exports.SalleController = void 0;
 const tsoa_1 = require("tsoa");
 const salleService = __importStar(require("../services/salle.service"));
 let SalleController = class SalleController extends tsoa_1.Controller {
-    async getSalles() {
-        return await salleService.getAllSalles();
+    async getSalles(type, building) {
+        return salleService.getAllSalles({ type, building });
     }
-    async createSalle(body) {
-        const { label, description, capacity, locationPrice } = body;
-        return await salleService.createSalle(label, description, capacity, locationPrice);
+    async getAvailableSalles(start, end) {
+        return salleService.getAvailableSalles(start, end);
     }
     async getSalleById(id) {
-        const salle = await salleService.getSalleById(id);
-        if (!salle)
-            throw new Error('Salle not found');
-        return salle;
+        return salleService.getSalleById(id);
+    }
+    async getAvailability(id, date) {
+        return salleService.getAvailableSlots(id, date);
+    }
+    async createSalle(body) {
+        this.setStatus(201);
+        return salleService.createSalle(body);
     }
     async updateSalle(id, body) {
-        const { label, description, capacity, locationPrice } = body;
-        const salle = await salleService.updateSalle(id, label, description, capacity, locationPrice);
-        if (!salle)
-            throw new Error('Salle not found');
-        return salle;
+        return salleService.updateSalle(id, body);
     }
     async deleteSalle(id) {
         await salleService.deleteSalle(id);
+        this.setStatus(204);
     }
 };
 exports.SalleController = SalleController;
 __decorate([
     (0, tsoa_1.Get)('/'),
+    __param(0, (0, tsoa_1.Query)()),
+    __param(1, (0, tsoa_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], SalleController.prototype, "getSalles", null);
 __decorate([
-    (0, tsoa_1.Post)('/'),
-    __param(0, (0, tsoa_1.Body)()),
+    (0, tsoa_1.Get)('disponibles'),
+    __param(0, (0, tsoa_1.Query)()),
+    __param(1, (0, tsoa_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
-], SalleController.prototype, "createSalle", null);
+], SalleController.prototype, "getAvailableSalles", null);
 __decorate([
     (0, tsoa_1.Get)('{id}'),
-    (0, tsoa_1.Response)(404, 'Salle not found'),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], SalleController.prototype, "getSalleById", null);
 __decorate([
+    (0, tsoa_1.Get)('{id}/disponibilites'),
+    __param(0, (0, tsoa_1.Path)()),
+    __param(1, (0, tsoa_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], SalleController.prototype, "getAvailability", null);
+__decorate([
+    (0, tsoa_1.Post)('/'),
+    (0, tsoa_1.Security)('jwt', ['ADMIN']),
+    __param(0, (0, tsoa_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], SalleController.prototype, "createSalle", null);
+__decorate([
     (0, tsoa_1.Put)('{id}'),
-    (0, tsoa_1.Response)(404, 'Salle not found'),
+    (0, tsoa_1.Security)('jwt', ['ADMIN']),
     __param(0, (0, tsoa_1.Path)()),
     __param(1, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
@@ -106,8 +124,7 @@ __decorate([
 ], SalleController.prototype, "updateSalle", null);
 __decorate([
     (0, tsoa_1.Delete)('{id}'),
-    (0, tsoa_1.Response)(404, 'Salle not found'),
-    (0, tsoa_1.Response)(204, 'No Content'),
+    (0, tsoa_1.Security)('jwt', ['ADMIN']),
     __param(0, (0, tsoa_1.Path)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

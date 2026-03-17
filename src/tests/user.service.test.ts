@@ -1,60 +1,58 @@
-import { signup, getAllUsers } from '../services/user.service'
+import { createUser, getAllUsers } from '../services/user.service'
 import { prisma } from '../prisma'
 
-// On dit à Jest de mocker Prisma
 jest.mock('../prisma', () => ({
-    prisma: {
-        user: {
-            create: jest.fn(),
-            findMany: jest.fn()
-        }
-    }
+  prisma: {
+    user: {
+      create: jest.fn(),
+      findMany: jest.fn(),
+    },
+  },
 }))
 
 describe('User Service', () => {
-    it('should signup a user with hashed password', async () => {
-        // Arrange : ce que Prisma doit retourner
-        const mockUser: any = { id: 1, email: 'test@example.com', name: 'Test User' };
-        (prisma.user.create as jest.Mock).mockResolvedValue(mockUser)
+  it('should create a user with hashed password', async () => {
+    const mockUser: any = { id: '1', email: 'test@example.com', name: 'Test User', role: 'USER' };
+    (prisma.user.create as jest.Mock).mockResolvedValue(mockUser)
 
-        // Act : on appelle la fonction à tester
-        const result = await signup('test@example.com', 'Test User', 'plain-password')
+    const result = await createUser('test@example.com', 'Test User', 'plain-password')
 
-        // Assert : vérifier que le résultat est correct
-        expect(result).toEqual(mockUser)
-        expect(prisma.user.create).toHaveBeenCalledWith({
-            data: {
-                email: 'test@example.com',
-                name: 'Test User',
-                password: expect.any(String)
-            },
-            select: {
-                id: true,
-                email: true,
-                name: true
-            }
-        })
+    expect(result).toEqual(mockUser)
+    expect(prisma.user.create).toHaveBeenCalledWith({
+      data: {
+        email: 'test@example.com',
+        name: 'Test User',
+        password: expect.any(String),
+        role: 'USER',
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+      },
     })
+  })
 
-    it('should get all users', async () => {
-        // Arrange : ce que Prisma doit retourner
-        const mockUsers: any = [
-            { id: 1, email: 'test1@example.com', name: 'Test User 1' },
-            { id: 2, email: 'test2@example.com', name: 'Test User 2' }
-        ];
-        (prisma.user.findMany as jest.Mock).mockResolvedValue(mockUsers)
+  it('should get all users', async () => {
+    const mockUsers: any = [
+      { id: '1', email: 'test1@example.com', name: 'Test User 1', role: 'USER' },
+      { id: '2', email: 'test2@example.com', name: 'Test User 2', role: 'ADMIN' },
+    ];
+    (prisma.user.findMany as jest.Mock).mockResolvedValue(mockUsers)
 
-        // Act : on appelle la fonction à tester
-        const result = await getAllUsers()
+    const result = await getAllUsers()
 
-        // Assert : vérifier que le résultat est correct
-        expect(result).toEqual(mockUsers)
-        expect(prisma.user.findMany).toHaveBeenCalledWith({
-            select: {
-                id: true,
-                email: true,
-                name: true
-            }
-        })
+    expect(result).toEqual(mockUsers)
+    expect(prisma.user.findMany).toHaveBeenCalledWith({
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+      },
     })
+  })
 })

@@ -13,26 +13,21 @@ jest.mock('../prisma', () => ({
         user: {
             findMany: jest.fn(),
             findUnique: jest.fn(),
-            create: jest.fn()
+            create: jest.fn(),
         },
-        $disconnect: jest.fn()
-    }
+        $disconnect: jest.fn(),
+    },
 }));
-(0, globals_1.describe)('User API', () => {
-    (0, globals_1.it)('GET /users should return 200', async () => {
-        ;
-        prisma_1.prisma.user.findMany.mockResolvedValue([{ id: '1', email: 'test@example.com', name: 'Test' }]);
-        const res = await (0, supertest_1.default)(app_1.default).get('/users');
-        (0, globals_1.expect)(res.statusCode).toBe(200);
-        (0, globals_1.expect)(Array.isArray(res.body)).toBe(true);
-    });
+(0, globals_1.describe)('Auth API', () => {
     (0, globals_1.it)('POST /auth/signup should create a user and return a token', async () => {
         ;
         prisma_1.prisma.user.findUnique.mockResolvedValue(null);
         prisma_1.prisma.user.create.mockResolvedValue({
             id: 'user-1',
             email: 'signup@example.com',
-            name: 'Test User'
+            name: 'Test User',
+            role: 'USER',
+            createdAt: new Date(),
         });
         const res = await (0, supertest_1.default)(app_1.default)
             .post('/auth/signup')
@@ -51,7 +46,8 @@ jest.mock('../prisma', () => ({
             id: 'user-2',
             email: uniqueEmail,
             name: 'Login User',
-            password: hashedPassword
+            role: 'USER',
+            password: hashedPassword,
         });
         const res = await (0, supertest_1.default)(app_1.default)
             .post('/auth/login')

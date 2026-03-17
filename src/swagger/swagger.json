@@ -7,7 +7,7 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
-			"User": {
+			"UserResponse": {
 				"properties": {
 					"id": {
 						"type": "string"
@@ -17,17 +17,26 @@
 					},
 					"name": {
 						"type": "string"
+					},
+					"role": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
 					}
 				},
 				"required": [
 					"id",
 					"email",
-					"name"
+					"name",
+					"role",
+					"createdAt"
 				],
 				"type": "object",
 				"additionalProperties": true
 			},
-			"Salle": {
+			"SalleResponse": {
 				"properties": {
 					"id": {
 						"type": "string"
@@ -43,9 +52,22 @@
 						"type": "number",
 						"format": "double"
 					},
-					"locationPrice": {
+					"pricePerHour": {
 						"type": "number",
 						"format": "double"
+					},
+					"building": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string"
+					},
+					"isActive": {
+						"type": "boolean"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
 					}
 				},
 				"required": [
@@ -53,66 +75,249 @@
 					"label",
 					"description",
 					"capacity",
-					"locationPrice"
+					"pricePerHour",
+					"building",
+					"type",
+					"isActive",
+					"createdAt"
 				],
 				"type": "object",
 				"additionalProperties": true
 			},
-			"PaymentStatus": {
-				"type": "string",
-				"enum": [
-					"PAID",
-					"UNPAID",
-					"DEPOSIT"
-				]
-			},
-			"Reservation": {
+			"AvailabilityResponse": {
 				"properties": {
-					"id": {
-						"type": "string"
-					},
-					"userId": {
+					"date": {
 						"type": "string"
 					},
 					"salleId": {
 						"type": "string"
 					},
-					"startDate": {
-						"type": "string",
-						"format": "date-time",
-						"nullable": true
+					"reservations": {
+						"items": {
+							"properties": {
+								"end": {
+									"type": "string"
+								},
+								"start": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"end",
+								"start"
+							],
+							"type": "object"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"date",
+					"salleId",
+					"reservations"
+				],
+				"type": "object",
+				"additionalProperties": true
+			},
+			"CreateSalleBody": {
+				"properties": {
+					"label": {
+						"type": "string"
 					},
-					"endDate": {
-						"type": "string",
-						"format": "date-time",
-						"nullable": true
+					"description": {
+						"type": "string"
 					},
-					"startHour": {
-						"type": "string",
-						"nullable": true
+					"capacity": {
+						"type": "number",
+						"format": "double"
 					},
-					"endHour": {
-						"type": "string",
-						"nullable": true
+					"pricePerHour": {
+						"type": "number",
+						"format": "double"
 					},
-					"isPaid": {
-						"$ref": "#/components/schemas/PaymentStatus"
+					"building": {
+						"type": "string"
 					},
-					"remainingAmount": {
+					"type": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"label",
+					"capacity",
+					"pricePerHour"
+				],
+				"type": "object",
+				"additionalProperties": true
+			},
+			"UpdateSalleBody": {
+				"properties": {
+					"label": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"capacity": {
+						"type": "number",
+						"format": "double"
+					},
+					"pricePerHour": {
+						"type": "number",
+						"format": "double"
+					},
+					"building": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"additionalProperties": true
+			},
+			"CreateReservationBody": {
+				"properties": {
+					"salleId": {
+						"type": "string"
+					},
+					"startTime": {
+						"type": "string"
+					},
+					"endTime": {
+						"type": "string"
+					},
+					"note": {
+						"type": "string"
+					},
+					"customPricePerHour": {
 						"type": "number",
 						"format": "double"
 					}
 				},
 				"required": [
-					"id",
-					"userId",
 					"salleId",
-					"startDate",
-					"endDate",
-					"startHour",
-					"endHour",
-					"isPaid",
-					"remainingAmount"
+					"startTime",
+					"endTime"
+				],
+				"type": "object",
+				"additionalProperties": true
+			},
+			"UpdateReservationBody": {
+				"properties": {
+					"startTime": {
+						"type": "string"
+					},
+					"endTime": {
+						"type": "string"
+					},
+					"note": {
+						"type": "string"
+					},
+					"customPricePerHour": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"type": "object",
+				"additionalProperties": true
+			},
+			"RecalibrateSnapshotsBody": {
+				"properties": {
+					"strategy": {
+						"type": "string",
+						"enum": [
+							"from-total",
+							"from-salle"
+						]
+					},
+					"dryRun": {
+						"type": "boolean"
+					},
+					"limit": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"type": "object",
+				"additionalProperties": true
+			},
+			"PaymentResponse": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"reservationId": {
+						"type": "string"
+					},
+					"amount": {
+						"type": "number",
+						"format": "double"
+					},
+					"method": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"reservationId",
+					"amount",
+					"method",
+					"createdAt"
+				],
+				"type": "object",
+				"additionalProperties": true
+			},
+			"CreatePaymentBody": {
+				"properties": {
+					"amount": {
+						"type": "number",
+						"format": "double"
+					},
+					"method": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"amount"
+				],
+				"type": "object",
+				"additionalProperties": true
+			},
+			"PaymentSummary": {
+				"properties": {
+					"reservationId": {
+						"type": "string"
+					},
+					"totalAmount": {
+						"type": "number",
+						"format": "double"
+					},
+					"paidAmount": {
+						"type": "number",
+						"format": "double"
+					},
+					"remainingAmount": {
+						"type": "number",
+						"format": "double"
+					},
+					"payments": {
+						"items": {
+							"$ref": "#/components/schemas/PaymentResponse"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"reservationId",
+					"totalAmount",
+					"paidAmount",
+					"remainingAmount",
+					"payments"
 				],
 				"type": "object",
 				"additionalProperties": true
@@ -127,12 +332,16 @@
 					},
 					"name": {
 						"type": "string"
+					},
+					"role": {
+						"type": "string"
 					}
 				},
 				"required": [
 					"id",
 					"email",
-					"name"
+					"name",
+					"role"
 				],
 				"type": "object",
 				"additionalProperties": true
@@ -152,9 +361,68 @@
 				],
 				"type": "object",
 				"additionalProperties": true
+			},
+			"SignupBody": {
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"email",
+					"name",
+					"password"
+				],
+				"type": "object",
+				"additionalProperties": true
+			},
+			"LoginBody": {
+				"properties": {
+					"email": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"email",
+					"password"
+				],
+				"type": "object",
+				"additionalProperties": true
+			},
+			"SeriesPoint": {
+				"properties": {
+					"period": {
+						"type": "string"
+					},
+					"value": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"period",
+					"value"
+				],
+				"type": "object",
+				"additionalProperties": true
 			}
 		},
-		"securitySchemes": {}
+		"securitySchemes": {
+			"jwt": {
+				"type": "http",
+				"scheme": "bearer",
+				"bearerFormat": "JWT"
+			}
+		}
 	},
 	"info": {
 		"title": "hall_backend",
@@ -175,7 +443,7 @@
 							"application/json": {
 								"schema": {
 									"items": {
-										"$ref": "#/components/schemas/User"
+										"$ref": "#/components/schemas/UserResponse"
 									},
 									"type": "array"
 								}
@@ -186,7 +454,44 @@
 				"tags": [
 					"User"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/users/me": {
+			"get": {
+				"operationId": "GetMe",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"allOf": [
+										{
+											"$ref": "#/components/schemas/UserResponse"
+										}
+									],
+									"nullable": true
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"User"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -200,7 +505,7 @@
 							"application/json": {
 								"schema": {
 									"items": {
-										"$ref": "#/components/schemas/Salle"
+										"$ref": "#/components/schemas/SalleResponse"
 									},
 									"type": "array"
 								}
@@ -212,7 +517,24 @@
 					"Salle"
 				],
 				"security": [],
-				"parameters": []
+				"parameters": [
+					{
+						"in": "query",
+						"name": "type",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "building",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			},
 			"post": {
 				"operationId": "CreateSalle",
@@ -222,7 +544,48 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Salle"
+									"$ref": "#/components/schemas/SalleResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Salle"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateSalleBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/salles/disponibles": {
+			"get": {
+				"operationId": "GetAvailableSalles",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/SalleResponse"
+									},
+									"type": "array"
 								}
 							}
 						}
@@ -232,39 +595,24 @@
 					"Salle"
 				],
 				"security": [],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"locationPrice": {
-										"type": "number",
-										"format": "double"
-									},
-									"capacity": {
-										"type": "number",
-										"format": "double"
-									},
-									"description": {
-										"type": "string"
-									},
-									"label": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"locationPrice",
-									"capacity",
-									"description",
-									"label"
-								],
-								"type": "object"
-							}
+				"parameters": [
+					{
+						"in": "query",
+						"name": "start",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "end",
+						"required": true,
+						"schema": {
+							"type": "string"
 						}
 					}
-				}
+				]
 			}
 		},
 		"/salles/{id}": {
@@ -276,13 +624,10 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Salle"
+									"$ref": "#/components/schemas/SalleResponse"
 								}
 							}
 						}
-					},
-					"404": {
-						"description": "Salle not found"
 					}
 				},
 				"tags": [
@@ -308,19 +653,22 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Salle"
+									"$ref": "#/components/schemas/SalleResponse"
 								}
 							}
 						}
-					},
-					"404": {
-						"description": "Salle not found"
 					}
 				},
 				"tags": [
 					"Salle"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -336,29 +684,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {
-									"locationPrice": {
-										"type": "number",
-										"format": "double"
-									},
-									"capacity": {
-										"type": "number",
-										"format": "double"
-									},
-									"description": {
-										"type": "string"
-									},
-									"label": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"locationPrice",
-									"capacity",
-									"description",
-									"label"
-								],
-								"type": "object"
+								"$ref": "#/components/schemas/UpdateSalleBody"
 							}
 						}
 					}
@@ -369,15 +695,18 @@
 				"responses": {
 					"204": {
 						"description": "No content"
-					},
-					"404": {
-						"description": "Salle not found"
 					}
 				},
 				"tags": [
 					"Salle"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -390,16 +719,56 @@
 				]
 			}
 		},
-		"/reservations": {
-			"post": {
-				"operationId": "CreateReservation",
+		"/salles/{id}/disponibilites": {
+			"get": {
+				"operationId": "GetAvailability",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/Reservation"
+									"$ref": "#/components/schemas/AvailabilityResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Salle"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "date",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/reservations": {
+			"get": {
+				"operationId": "GetReservations",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {},
+									"type": "array"
 								}
 							}
 						}
@@ -408,53 +777,265 @@
 				"tags": [
 					"Reservation"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "CreateReservation",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Reservation"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {
-									"remainingAmount": {
-										"type": "number",
-										"format": "double"
-									},
-									"isPaid": {
-										"$ref": "#/components/schemas/PaymentStatus"
-									},
-									"endHour": {
-										"type": "string"
-									},
-									"startHour": {
-										"type": "string"
-									},
-									"endDate": {
-										"type": "string"
-									},
-									"startDate": {
-										"type": "string"
-									},
-									"salleId": {
-										"type": "string"
-									},
-									"userId": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"endHour",
-									"startHour",
-									"endDate",
-									"startDate",
-									"salleId",
-									"userId"
-								],
-								"type": "object"
+								"$ref": "#/components/schemas/CreateReservationBody"
 							}
 						}
 					}
 				}
+			}
+		},
+		"/reservations/{id}": {
+			"get": {
+				"operationId": "GetReservationById",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Reservation"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateReservation",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Reservation"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateReservationBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/reservations/{id}/cancel": {
+			"patch": {
+				"operationId": "CancelReservation",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Reservation"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/reservations/admin/recalibrate-price-snapshots": {
+			"post": {
+				"operationId": "RecalibratePriceSnapshots",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Reservation"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RecalibrateSnapshotsBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/reservations/{reservationId}/payments": {
+			"post": {
+				"operationId": "AddPayment",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PaymentResponse"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Payment"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "reservationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreatePaymentBody"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "GetPayments",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PaymentSummary"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Payment"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "reservationId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		},
 		"/auth/signup": {
@@ -470,12 +1051,6 @@
 								}
 							}
 						}
-					},
-					"400": {
-						"description": "email, name and password are required"
-					},
-					"409": {
-						"description": "Email already exists"
 					}
 				},
 				"tags": [
@@ -488,23 +1063,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {
-									"password": {
-										"type": "string"
-									},
-									"name": {
-										"type": "string"
-									},
-									"email": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"password",
-									"name",
-									"email"
-								],
-								"type": "object"
+								"$ref": "#/components/schemas/SignupBody"
 							}
 						}
 					}
@@ -524,12 +1083,6 @@
 								}
 							}
 						}
-					},
-					"400": {
-						"description": "email and password are required"
-					},
-					"401": {
-						"description": "Invalid credentials"
 					}
 				},
 				"tags": [
@@ -542,23 +1095,267 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {
-									"password": {
-										"type": "string"
-									},
-									"email": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"password",
-									"email"
-								],
-								"type": "object"
+								"$ref": "#/components/schemas/LoginBody"
 							}
 						}
 					}
 				}
+			}
+		},
+		"/analytics/overview": {
+			"get": {
+				"operationId": "GetOverview",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Analytics"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "from",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "to",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/analytics/reservations/series": {
+			"get": {
+				"operationId": "GetReservationSeries",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/SeriesPoint"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Analytics"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "granularity",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "from",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "to",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/analytics/revenue/series": {
+			"get": {
+				"operationId": "GetRevenueSeries",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/SeriesPoint"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Analytics"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "granularity",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "from",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "to",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/analytics/salles/top": {
+			"get": {
+				"operationId": "GetTopSalles",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Analytics"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "from",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "to",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/analytics/payments/methods": {
+			"get": {
+				"operationId": "GetPaymentMethods",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Analytics"
+				],
+				"security": [
+					{
+						"jwt": [
+							"ADMIN"
+						]
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "from",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "to",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		}
 	},

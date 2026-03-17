@@ -9,9 +9,3 @@
 * 🟢 You can import this file directly.
 */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PaymentStatus = void 0;
-exports.PaymentStatus = {
-    PAID: 'PAID',
-    UNPAID: 'UNPAID',
-    DEPOSIT: 'DEPOSIT'
-};

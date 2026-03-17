@@ -40,21 +40,18 @@ exports.login = exports.signup = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const userService = __importStar(require("./user.service"));
+const errors_1 = require("../errors");
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 const JWT_EXPIRES_IN = '1d';
 const buildToken = (user) => {
-    return jsonwebtoken_1.default.sign({
-        sub: user.id,
-        email: user.email,
-        name: user.name
-    }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+    return jsonwebtoken_1.default.sign({ sub: user.id, email: user.email, name: user.name, role: user.role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 };
 const signup = async (email, name, password) => {
-    const existingUser = await userService.getUserByEmail(email);
-    if (existingUser) {
-        throw new Error('EMAIL_ALREADY_EXISTS');
+    const existing = await userService.getUserByEmail(email);
+    if (existing) {
+        throw new errors_1.ConflictError('Email already exists');
     }
-    const user = await userService.signup(email, name, password);
+    const user = await userService.createUser(email, name, password);
     const token = buildToken(user);
     return { user, token };
 };
@@ -62,20 +59,14 @@ exports.signup = signup;
 const login = async (email, password) => {
     const user = await userService.getUserByEmail(email);
     if (!user) {
-        throw new Error('INVALID_CREDENTIALS');
+        throw new errors_1.UnauthorizedError('Invalid credentials');
     }
-    const isPasswordValid = await bcryptjs_1.default.compare(password, user.password);
-    if (!isPasswordValid) {
-        throw new Error('INVALID_CREDENTIALS');
+    const valid = await bcryptjs_1.default.compare(password, user.password);
+    if (!valid) {
+        throw new errors_1.UnauthorizedError('Invalid credentials');
     }
-    const token = buildToken({ id: user.id, email: user.email, name: user.name });
-    return {
-        user: {
-            id: user.id,
-            email: user.email,
-            name: user.name
-        },
-        token
-    };
+    const safeUser = { id: user.id, email: user.email, name: user.name, role: user.role };
+    const token = buildToken(safeUser);
+    return { user: safeUser, token };
 };
 exports.login = login;

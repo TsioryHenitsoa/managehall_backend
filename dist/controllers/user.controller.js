@@ -41,28 +41,38 @@ var __importStar = (this && this.__importStar) || (function () {
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
 const tsoa_1 = require("tsoa");
 const userService = __importStar(require("../services/user.service"));
 let UserController = class UserController extends tsoa_1.Controller {
     async getUsers() {
-        try {
-            return await userService.getAllUsers();
-        }
-        catch (err) {
-            this.setStatus(500);
-            throw new Error('Internal Server Error');
-        }
+        return userService.getAllUsers();
+    }
+    async getMe(req) {
+        const decoded = req.user;
+        return userService.getUserById(decoded.sub);
     }
 };
 exports.UserController = UserController;
 __decorate([
     (0, tsoa_1.Get)('/'),
+    (0, tsoa_1.Security)('jwt', ['ADMIN']),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getUsers", null);
+__decorate([
+    (0, tsoa_1.Get)('me'),
+    (0, tsoa_1.Security)('jwt'),
+    __param(0, (0, tsoa_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getMe", null);
 exports.UserController = UserController = __decorate([
     (0, tsoa_1.Route)('users'),
     (0, tsoa_1.Tags)('User')

@@ -9,27 +9,21 @@ jest.mock('../prisma', () => ({
     user: {
       findMany: jest.fn(),
       findUnique: jest.fn(),
-      create: jest.fn()
+      create: jest.fn(),
     },
-    $disconnect: jest.fn()
-  }
+    $disconnect: jest.fn(),
+  },
 }))
 
-describe('User API', () => {
-  it('GET /users should return 200', async () => {
-    ;(prisma.user.findMany as jest.Mock).mockResolvedValue([{ id: '1', email: 'test@example.com', name: 'Test' }])
-
-    const res = await request(app).get('/users')
-    expect(res.statusCode).toBe(200)
-    expect(Array.isArray(res.body)).toBe(true)
-  })
-
+describe('Auth API', () => {
   it('POST /auth/signup should create a user and return a token', async () => {
     ;(prisma.user.findUnique as jest.Mock).mockResolvedValue(null)
     ;(prisma.user.create as jest.Mock).mockResolvedValue({
       id: 'user-1',
       email: 'signup@example.com',
-      name: 'Test User'
+      name: 'Test User',
+      role: 'USER',
+      createdAt: new Date(),
     })
 
     const res = await request(app)
@@ -52,7 +46,8 @@ describe('User API', () => {
       id: 'user-2',
       email: uniqueEmail,
       name: 'Login User',
-      password: hashedPassword
+      role: 'USER',
+      password: hashedPassword,
     })
 
     const res = await request(app)
@@ -64,7 +59,6 @@ describe('User API', () => {
     expect(res.body).toHaveProperty('user')
     expect(res.body.user).toHaveProperty('email', uniqueEmail)
   })
-
 })
 
 afterAll(async () => {

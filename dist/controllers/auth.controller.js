@@ -50,51 +50,17 @@ const tsoa_1 = require("tsoa");
 const authService = __importStar(require("../services/auth.service"));
 let AuthController = class AuthController extends tsoa_1.Controller {
     async signup(body) {
-        const { email, name, password } = body;
-        if (!email || !name || !password) {
-            this.setStatus(400);
-            throw new Error('email, name and password are required');
-        }
-        try {
-            const result = await authService.signup(email, name, password);
-            this.setStatus(201);
-            return result;
-        }
-        catch (err) {
-            if (err instanceof Error && err.message === 'EMAIL_ALREADY_EXISTS') {
-                this.setStatus(409);
-                throw new Error('Email already exists');
-            }
-            this.setStatus(500);
-            throw new Error('Internal Server Error');
-        }
+        const result = await authService.signup(body.email, body.name, body.password);
+        this.setStatus(201);
+        return result;
     }
     async login(body) {
-        const { email, password } = body;
-        if (!email || !password) {
-            this.setStatus(400);
-            throw new Error('email and password are required');
-        }
-        try {
-            const result = await authService.login(email, password);
-            this.setStatus(200);
-            return result;
-        }
-        catch (err) {
-            if (err instanceof Error && err.message === 'INVALID_CREDENTIALS') {
-                this.setStatus(401);
-                throw new Error('Invalid credentials');
-            }
-            this.setStatus(500);
-            throw new Error('Internal Server Error');
-        }
+        return authService.login(body.email, body.password);
     }
 };
 exports.AuthController = AuthController;
 __decorate([
     (0, tsoa_1.Post)('signup'),
-    (0, tsoa_1.Response)(400, 'email, name and password are required'),
-    (0, tsoa_1.Response)(409, 'Email already exists'),
     __param(0, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -102,8 +68,6 @@ __decorate([
 ], AuthController.prototype, "signup", null);
 __decorate([
     (0, tsoa_1.Post)('login'),
-    (0, tsoa_1.Response)(400, 'email and password are required'),
-    (0, tsoa_1.Response)(401, 'Invalid credentials'),
     __param(0, (0, tsoa_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
