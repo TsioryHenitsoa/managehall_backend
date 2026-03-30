@@ -97,7 +97,7 @@ export const getOverview = async (from?: string, to?: string) => {
     await Promise.all([
       prisma.reservation.count({ where: reservationWhere }),
       prisma.reservation.count({ where: { ...reservationWhere, status: 'CANCELLED' } }),
-      prisma.reservation.aggregate({ where: reservationWhere, _sum: { totalAmount: true, paidAmount: true } }),
+      prisma.reservation.aggregate({ where: { ...reservationWhere, status: { not: 'CANCELLED' } }, _sum: { totalAmount: true, paidAmount: true } }),
       prisma.payment.aggregate({ where: paymentWhere, _sum: { amount: true } }),
       prisma.salle.count({ where: { isActive: true } }),
       prisma.reservation.findMany({
